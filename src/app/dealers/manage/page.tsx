@@ -15,7 +15,8 @@ import {
   Phone,
   Layers,
   MapPin,
-  Menu
+  Menu,
+  KeyRound
 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 
@@ -188,10 +189,44 @@ export default function OutletMasterSetupPage() {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400">
-                      TSM: <strong className="text-slate-700">{d.tsm_name || 'Unassigned'}</strong>
-                    </span>
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const confirmReset = window.confirm(`Reset password for dealer '${d.ro_name}' (CMS: ${d.cms_code}) to '123456'?\n\nDealer will be required to set a new password on their next login.`);
+                        if (!confirmReset) return;
+
+                        try {
+                          const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null;
+                          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+                          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                          const res = await fetch('/api/auth/admin-reset-password', {
+                            method: 'POST',
+                            headers,
+                            body: JSON.stringify({ cmsCode: d.cms_code, customPassword: '123456' })
+                          });
+                          const resData = await res.json();
+                          if (resData.success) {
+                            if (resData.whatsappUrl) {
+                              const openWA = window.confirm(`✅ Password reset to '123456' successfully!\n\nOpen WhatsApp to notify ${d.dealer_name} (${d.dealer_mobile})?`);
+                              if (openWA) window.open(resData.whatsappUrl, '_blank');
+                            } else {
+                              alert(`✅ Password reset to '123456' successfully!`);
+                            }
+                          } else {
+                            alert('Failed to reset password: ' + resData.error);
+                          }
+                        } catch (err: any) {
+                          alert('Error resetting password: ' + err.message);
+                        }
+                      }}
+                      className="inline-flex items-center px-2.5 py-1.5 border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold rounded-lg transition cursor-pointer"
+                      title="Reset dealer password to 123456"
+                    >
+                      <KeyRound className="w-3.5 h-3.5 mr-1 text-amber-700" />
+                      <span>Reset Pass</span>
+                    </button>
 
                     <Link
                       href={`/dealers/${encodeURIComponent(d.cms_code)}`}
