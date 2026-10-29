@@ -6,6 +6,7 @@ import { Camera } from 'lucide-react';
 interface TankCalibrationSectionProps {
   tanks: any[];
   isAdmin: boolean;
+  isApproved?: boolean;
   reuploadRequests: any[];
   onRequestReupload: (modalData: { targetId: string; category: 'TANK'; title: string; url: string; reason: string }) => void;
   onOpenPhotoModal: (title: string, url: string) => void;
@@ -14,6 +15,7 @@ interface TankCalibrationSectionProps {
 export function TankCalibrationSection({
   tanks,
   isAdmin,
+  isApproved = false,
   reuploadRequests,
   onRequestReupload,
   onOpenPhotoModal
@@ -104,7 +106,7 @@ export function TankCalibrationSection({
                   </div>
                 )}
 
-                {isAdmin && (
+                {isAdmin && !isApproved && (
                   <button
                     type="button"
                     onClick={() => onRequestReupload({
@@ -123,6 +125,12 @@ export function TankCalibrationSection({
                     <Camera className="w-3 h-3 text-current" />
                     <span>{pendingReq ? 'Edit Re-upload ✎' : 'Request Re-upload'}</span>
                   </button>
+                )}
+
+                {isApproved && (
+                  <div className="w-full py-0.5 px-1 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 text-center flex items-center justify-center space-x-1">
+                    <span>✓ Verified &amp; Approved</span>
+                  </div>
                 )}
               </div>
             </div>

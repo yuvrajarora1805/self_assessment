@@ -218,6 +218,7 @@ function AuditReportContent() {
           <TankCalibrationSection
             tanks={audit.tanks}
             isAdmin={isAdmin}
+            isApproved={audit.approval_status === 'APPROVED'}
             reuploadRequests={reuploadRequests}
             onRequestReupload={(data) => setReuploadModal(data)}
             onOpenPhotoModal={(title, url) => setActivePhotoModal({ title, url })}
@@ -228,6 +229,7 @@ function AuditReportContent() {
           <PhotoEvidenceGallery
             photos={audit.photos}
             isAdmin={isAdmin}
+            isApproved={audit.approval_status === 'APPROVED'}
             reuploadRequests={reuploadRequests}
             onRequestReupload={(data) => setReuploadModal(data)}
             onOpenPhotoModal={(title, url) => setActivePhotoModal({ title, url })}

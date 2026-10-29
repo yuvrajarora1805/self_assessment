@@ -209,6 +209,35 @@ export function getDb() {
       dbInstance.exec("ALTER TABLE audits ADD COLUMN increment_confirmed INTEGER DEFAULT 0;");
     } catch (e) {}
 
+    // One-time migration system to run cleanup exactly once across server restarts / Docker deployments
+    try {
+      dbInstance.exec(`
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+          version TEXT PRIMARY KEY,
+          applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      const hasRunCleanReset = dbInstance.prepare("SELECT 1 FROM schema_migrations WHERE version = '20261030_fresh_audit_reset'").get();
+      if (!hasRunCleanReset) {
+        // Clear all previous audit submissions, responses, photos, and drafts for a completely fresh start
+        dbInstance.exec(`
+          DELETE FROM audit_responses;
+          DELETE FROM audit_statutory;
+          DELETE FROM audit_photos;
+          DELETE FROM audit_tanks;
+          DELETE FROM audit_reupload_requests;
+          DELETE FROM audit_drafts;
+          DELETE FROM audits;
+          DELETE FROM sessions;
+          UPDATE users SET must_change_password = 1 WHERE role = 'DEALER';
+          INSERT INTO schema_migrations (version) VALUES ('20261030_fresh_audit_reset');
+        `);
+      }
+    } catch (e) {
+      console.error('Migration 20261030_fresh_audit_reset error:', e);
+    }
+
     // Seed default fixed tanks if empty
     const tankMasterCount = (dbInstance.prepare('SELECT COUNT(*) as count FROM ro_fixed_tanks').get() as any)?.count || 0;
     if (tankMasterCount === 0) {

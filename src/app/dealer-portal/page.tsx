@@ -23,6 +23,7 @@ import {
   Compass,
   RefreshCw,
   Camera,
+  Clock,
   Upload
 } from 'lucide-react';
 
@@ -38,9 +39,10 @@ export default function DealerPortalPage() {
   const [gpsAddress, setGpsAddress] = useState<string | null>(null);
   const [gpsError, setGpsError] = useState<string | null>(null);
 
-  // Re-upload Requests State
+  // Re-upload Requests & Monthly Cycle State
   const [pendingReuploads, setPendingReuploads] = useState<any[]>([]);
   const [completedAudit, setCompletedAudit] = useState<any | null>(null);
+  const [cycleInfo, setCycleInfo] = useState<any | null>(null);
   const [activeUploadModal, setActiveUploadModal] = useState<any | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
@@ -100,6 +102,9 @@ export default function DealerPortalPage() {
                 }
                 if (data.profile.completedAudit) {
                   setCompletedAudit(data.profile.completedAudit);
+                }
+                if (data.profile.cycleInfo) {
+                  setCycleInfo(data.profile.cycleInfo);
                 }
               }
             })
@@ -330,6 +335,23 @@ export default function DealerPortalPage() {
 
           {/* Header Action Buttons */}
           <div className="flex items-center space-x-2 shrink-0">
+            {cycleInfo && (
+              <div className={`hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                completedAudit?.approval_status === 'APPROVED'
+                  ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-200'
+                  : cycleInfo.isOverdue
+                  ? 'bg-rose-500/20 border-rose-400/50 text-rose-200'
+                  : 'bg-amber-500/20 border-amber-400/40 text-amber-200'
+              }`}>
+                <Clock className="w-3.5 h-3.5" />
+                <span>
+                  {completedAudit?.approval_status === 'APPROVED'
+                    ? `${cycleInfo.monthName} Certified`
+                    : cycleInfo.badgeText}
+                </span>
+              </div>
+            )}
+
             <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-[11px] text-emerald-300 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               <span>Verified Dealer</span>

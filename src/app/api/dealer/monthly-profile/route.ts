@@ -168,6 +168,9 @@ export async function GET(request: Request) {
       ];
     }
 
+    const { getMonthlyCycleInfo } = await import('@/lib/audit-helpers');
+    const cycleInfo = getMonthlyCycleInfo(now);
+
     return NextResponse.json({
       success: true,
       profile: {
@@ -186,6 +189,7 @@ export async function GET(request: Request) {
         },
         tanks,
         currentAuditMonth: currentMonth,
+        cycleInfo,
         hasCompletedThisMonth: !!currentMonthAudit,
         completedAudit: currentMonthAudit || null,
         certificates,

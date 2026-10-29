@@ -6,6 +6,7 @@ import { Camera } from 'lucide-react';
 interface PhotoEvidenceGalleryProps {
   photos: any[];
   isAdmin: boolean;
+  isApproved?: boolean;
   reuploadRequests: any[];
   onRequestReupload: (modalData: { targetId: string; category: 'PHOTO'; title: string; url: string; reason: string }) => void;
   onOpenPhotoModal: (title: string, url: string) => void;
@@ -14,6 +15,7 @@ interface PhotoEvidenceGalleryProps {
 export function PhotoEvidenceGallery({
   photos,
   isAdmin,
+  isApproved = false,
   reuploadRequests,
   onRequestReupload,
   onOpenPhotoModal
@@ -88,7 +90,7 @@ export function PhotoEvidenceGallery({
                   </div>
                 )}
 
-                {isAdmin && (
+                {isAdmin && !isApproved && (
                   <button
                     type="button"
                     onClick={() => onRequestReupload({
@@ -109,6 +111,12 @@ export function PhotoEvidenceGallery({
                     <Camera className="w-3 h-3 text-current" />
                     <span>{pendingReq ? 'Edit Re-upload ✎' : resolvedReq ? 'Re-review / Request Again' : 'Request Re-upload'}</span>
                   </button>
+                )}
+
+                {isApproved && (
+                  <div className="w-full py-0.5 px-1 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 text-center flex items-center justify-center space-x-1">
+                    <span>✓ Verified &amp; Approved</span>
+                  </div>
                 )}
               </div>
             </div>

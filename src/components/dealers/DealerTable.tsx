@@ -88,16 +88,15 @@ export function DealerTable({ dealers, onOpenDetails }: DealerTableProps) {
               let waBgClass = 'bg-emerald-600 hover:bg-emerald-700 text-white';
               let waTooltip = 'Send WhatsApp alert';
 
-              if (hasPendingReuploads) {
-                waText = `*Action Required: FuelAudit Photo Re-upload*\n\nDear Partner (${d.ro_name} / CMS: ${d.cms_code}),\n\nOperations HQ has requested replacement photo evidence for your monthly audit. Please open your portal and upload the clear images:\nhttps://self.yarora.dev/audit-form?cmsCode=${encodeURIComponent(d.cms_code)}`;
-                waLabel = 'Request Re-upload';
-                waBgClass = 'bg-amber-600 hover:bg-amber-700 text-white';
-                waTooltip = 'Send photo re-upload reminder to dealer';
-              } else if (isApproved) {
+              if (isApproved) {
                 waText = `*Congratulations! Monthly Audit Certified*\n\nDear Partner (${d.ro_name} / CMS: ${d.cms_code}),\n\nYour monthly self-assessment has been reviewed and *APPROVED* by Operations HQ with score ${d.percentage}% (Grade: ${d.grade}).\n\nView certified report: https://self.yarora.dev/audits/${d.latest_audit_id}`;
                 waLabel = 'Send Cert Link';
                 waBgClass = 'bg-emerald-600 hover:bg-emerald-700 text-white';
                 waTooltip = 'Send approval & report certificate link';
+              } else if (hasPendingReuploads) {
+                waText = `*Action Required: FuelAudit Photo Re-upload*\n\nDear Partner (${d.ro_name} / CMS: ${d.cms_code}),\n\nOperations HQ has requested replacement photo evidence for your monthly audit. Please open your portal and upload the clear images:\nhttps://self.yarora.dev/audit-form?cmsCode=${encodeURIComponent(d.cms_code)}`;
+                waLabel = 'Request Re-upload';
+                waBgClass = 'bg-amber-600 hover:bg-amber-700 text-white';
               } else if (isPendingApproval) {
                 waText = `*Audit Received & In Review*\n\nDear Partner (${d.ro_name} / CMS: ${d.cms_code}),\n\nYour monthly self-assessment submission has been received and is currently under review by Operations HQ. Score: ${d.percentage}%.`;
                 waLabel = 'Send Review Update';
