@@ -15,7 +15,9 @@ import {
   ExternalLink, 
   CheckCircle2, 
   AlertTriangle,
-  Compass
+  Compass,
+  KeyRound,
+  MessageSquare
 } from 'lucide-react';
 import { DealerTanksTab } from '@/components/dealers/DealerTanksTab';
 
@@ -387,7 +389,49 @@ export default function DealerDetailPage({ params }: DealerDetailPageProps) {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+            <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  const confirmReset = window.confirm(`Reset password for dealer account '${dealer.cms_code}' to '123456'?\n\nThey will be prompted to set a new password upon their next login.`);
+                  if (!confirmReset) return;
+
+                  try {
+                    const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null;
+                    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+                    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                    const res = await fetch('/api/auth/admin-reset-password', {
+                      method: 'POST',
+                      headers,
+                      body: JSON.stringify({ cmsCode: dealer.cms_code, customPassword: '123456' })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      setFeedback({
+                        type: 'success',
+                        text: `Password reset to temporary: '123456'. Dealer must create new password on next login.`
+                      });
+                      if (data.whatsappUrl) {
+                        const sendWhatsApp = window.confirm(`Password reset done!\n\nWould you like to open WhatsApp to send the temporary credentials to ${dealer.dealer_name} (${dealer.dealer_mobile})?`);
+                        if (sendWhatsApp) {
+                          window.open(data.whatsappUrl, '_blank');
+                        }
+                      }
+                    } else {
+                      setFeedback({ type: 'error', text: data.error || 'Failed to reset password' });
+                    }
+                  } catch (e: any) {
+                    setFeedback({ type: 'error', text: e.message });
+                  }
+                }}
+                className="inline-flex items-center px-4 py-2 border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl text-xs font-bold transition cursor-pointer"
+                title="Reset password to 123456 and require dealer to create new password on login"
+              >
+                <KeyRound className="w-4 h-4 mr-1.5 text-amber-700" />
+                <span>Reset Dealer Password</span>
+              </button>
+
               <button
                 type="submit"
                 disabled={saving}
