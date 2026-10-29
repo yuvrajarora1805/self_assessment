@@ -177,6 +177,48 @@ export default function DealerDetailPage({ params }: DealerDetailPageProps) {
         </div>
 
         <div className="flex items-center space-x-2.5">
+          <button
+            type="button"
+            onClick={async () => {
+              const confirmReset = window.confirm(`Reset password for dealer account '${dealer.cms_code}' to '123456'?\n\nThey will be prompted to set a new password upon their next login.`);
+              if (!confirmReset) return;
+
+              try {
+                const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null;
+                const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch('/api/auth/admin-reset-password', {
+                  method: 'POST',
+                  headers,
+                  body: JSON.stringify({ cmsCode: dealer.cms_code, customPassword: '123456' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                  setFeedback({
+                    type: 'success',
+                    text: `Password reset to temporary: '123456'. Dealer must create new password on next login.`
+                  });
+                  if (data.whatsappUrl) {
+                    const sendWhatsApp = window.confirm(`Password reset done!\n\nWould you like to open WhatsApp to send the temporary credentials to ${dealer.dealer_name} (${dealer.dealer_mobile})?`);
+                    if (sendWhatsApp) {
+                      window.open(data.whatsappUrl, '_blank');
+                    }
+                  }
+                } else {
+                  setFeedback({ type: 'error', text: data.error || 'Failed to reset password' });
+                }
+              } catch (e: any) {
+                setFeedback({ type: 'error', text: e.message });
+              }
+            }}
+            className="inline-flex items-center px-3 py-1.5 bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-300 text-xs font-bold rounded-lg transition cursor-pointer shadow-xs"
+            title="Reset dealer password to 123456"
+          >
+            <KeyRound className="w-3.5 h-3.5 mr-1 text-amber-700" />
+            <span>Reset Password</span>
+          </button>
+
           <a
             href={`https://maps.google.com/?q=${dealer.latitude},${dealer.longitude}`}
             target="_blank"
