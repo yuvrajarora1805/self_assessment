@@ -1,0 +1,7 @@
+node_modules
+.next
+.git
+strix/strix/interface/viewer/frontend/node_modules
+strix/.git
+strix_runs
+*.log

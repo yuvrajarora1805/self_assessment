@@ -1,0 +1,17 @@
+services:
+  # Self-Access Fuel Compliance & Retail Audit Dashboard
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: selfaccess-dashboard
+    restart: unless-stopped
+    ports:
+      # Maps host port 3005 to internal container port 3000 (leaves 3000-3004 free)
+      - "3005:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      # Persists SQLite database, monthly audits, certificates, and fixed tanks
+      - ./data:/app/data
