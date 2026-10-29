@@ -36,14 +36,12 @@ RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/data ./data
 
-# Copy build artifacts and dependencies
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/data ./data
-
-USER nextjs
-
+# Running as default container user ensures mounted volume `./data` 
+# has full write permissions even when created by host root user.
 EXPOSE 3000
 
 CMD ["npm", "run", "start"]
