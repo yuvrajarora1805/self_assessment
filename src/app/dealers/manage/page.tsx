@@ -28,8 +28,18 @@ export default function OutletMasterSetupPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    fetch('/api/dealers')
-      .then(res => res.json())
+    const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null;
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    fetch('/api/dealers', { headers })
+      .then(res => {
+        if (res.status === 401) {
+          window.location.replace('/login?expired=1');
+          return { dealers: [] };
+        }
+        return res.json();
+      })
       .then(data => {
         if (data.dealers) setDealers(data.dealers);
       })

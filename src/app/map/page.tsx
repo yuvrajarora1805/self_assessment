@@ -51,7 +51,11 @@ export default function GeospatialMapPage() {
   const markersRef = useRef<any[]>([]);
 
   useEffect(() => {
-    fetch('/api/dealers')
+    const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null;
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    fetch('/api/dealers', { headers })
       .then(async r => {
         if (!r.ok) return { success: false, dealers: [] };
         return r.json();

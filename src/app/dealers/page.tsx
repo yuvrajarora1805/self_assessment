@@ -61,7 +61,15 @@ export default function DealersManagementPage() {
   const loadDealers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/dealers?zone=${selectedZone}&status=${statusFilter}&search=${encodeURIComponent(search)}`);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null;
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`/api/dealers?zone=${selectedZone}&status=${statusFilter}&search=${encodeURIComponent(search)}`, { headers });
+      if (res.status === 401) {
+        window.location.replace('/login?expired=1');
+        return;
+      }
       const data = await res.json();
       if (data.success) {
         setDealers(data.dealers);
@@ -85,11 +93,15 @@ export default function DealersManagementPage() {
     setLoadingDetails(true);
 
     try {
-      const subRes = await fetch(`/api/audits?cmsCode=${dealer.cms_code}`);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null;
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const subRes = await fetch(`/api/audits?cmsCode=${dealer.cms_code}`, { headers });
       const subData = await subRes.json();
       if (subData.success) setDealerSubmissions(subData.audits || []);
 
-      const profRes = await fetch(`/api/dealer/monthly-profile?cmsCode=${dealer.cms_code}`);
+      const profRes = await fetch(`/api/dealer/monthly-profile?cmsCode=${dealer.cms_code}`, { headers });
       const profData = await profRes.json();
       if (profData.success) setDealerProfileData(profData);
     } catch (err) {
@@ -102,9 +114,13 @@ export default function DealersManagementPage() {
   const handleCreateDealer = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null;
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/dealers', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(formData)
       });
       const data = await res.json();

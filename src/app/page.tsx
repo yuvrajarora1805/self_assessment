@@ -77,15 +77,19 @@ export default function AttendProDashboard() {
   };
 
   const fetchStats = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null;
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     Promise.all([
-      fetch('/api/dealers').then(async r => {
+      fetch('/api/dealers', { headers }).then(async r => {
         if (r.status === 401 || r.status === 403) {
           handleUnauthorized();
           return { success: false, dealers: [] };
         }
         return r.json();
       }),
-      fetch('/api/stats').then(async r => {
+      fetch('/api/stats', { headers }).then(async r => {
         if (r.status === 401 || r.status === 403) {
           handleUnauthorized();
           return { success: false };
